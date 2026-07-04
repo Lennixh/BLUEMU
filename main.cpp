@@ -3,13 +3,19 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[6] = {
+uint16_t program0[0xC] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
-	0xF005, // #3 (NOP)
-	0xF010, // #4 (NOP)
-	0xA000  // #5 (JMP->#0)
+	0xA006, // #3 (JMP->#6)
+	0x9010, // #4 (JMA->#10) shouldn't happen
+	0xA003, // #5 (JMP->#3)
+    0xE000, // #6 (CSA)
+    0x8009, // #7 (SRJ->#9)
+    0xF676, // #8 (NOP)
+    0x900B, // #9 (JMA->#B)
+    0xF696, // #A (NOP)
+    0x0000  // #B (HLT)
 };
 
 typedef enum 
@@ -33,10 +39,12 @@ bRegister IR;
 bRegister MAR;
 bRegister MBR;
 bRegister PC = 0x00;
-bRegister SR;
+bRegister SR = 0b1000000000000111;
 bRegister Z;
 
-
+#define ON true
+#define OFF false
+bool RUN = ON;
 
 
 void dumpRegisters()
@@ -46,7 +54,14 @@ void dumpRegisters()
 
 void doHLT(uint8_t tick)
 {
-
+    if (tick == 7)
+    {
+        RUN = OFF;
+    }
+    else if (tick == 8)
+    {
+        MAR = PC;
+    }
 }
 
 void doADD(uint8_t tick)
@@ -86,12 +101,41 @@ void doSTA(uint8_t tick)
 
 void doSRJ(uint8_t tick)
 {
-    
+    if (tick == 6)
+    {
+        ACC = (ACC | (PC & 0x0FFF));
+    }
+    else if (tick == 7)
+    {
+        PC = 0x00;
+    }
+    else if (tick == 8)
+    {
+        PC = (IR & 0x0FFF);
+        MAR = PC;
+    }
 }
 
 void doJMA(uint8_t tick)
 {
-    
+    if (tick == 6)
+    {
+        if (1 == ((ACC >> 15) & 1))
+        {
+            PC = 0x00;
+        }
+    }
+    else if (tick == 7)
+    {
+        if (1 == ((ACC >> 15) & 1))
+        {
+            PC = (IR & 0x0FFF);
+        }
+    }
+    else if (tick == 8)
+    {
+        MAR = PC;
+    }
 }
 
 void doJMP(uint8_t tick)
@@ -127,7 +171,18 @@ void doRAL(uint8_t tick)
 
 void doCSA(uint8_t tick)
 {
-    
+    if (tick == 6)
+    {
+        ACC = 0x00;
+    }
+    else if (tick == 7)
+    {
+        ACC = SR;
+    }
+    else if (tick == 8)
+    {
+        MAR = PC;
+    }   
 }
 
 void doNOP(uint8_t tick)
@@ -240,9 +295,14 @@ void runProgram(const uint16_t* program)
     memmove(RAM, program, (RAM_LENGTH * sizeof(uint16_t)));
     for (;;)
     {
+        if(RUN == OFF)
+        {
+            goto quit;
+        }
         doCycle();
         dumpRegisters();
     }
+    quit: std::cout << "Finished execution\n";
 }
 
 
