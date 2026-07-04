@@ -42,9 +42,13 @@ bRegister PC = 0x00;
 bRegister SR = 0b1000000000000111;
 bRegister Z;
 
-#define ON true
-#define OFF false
-bool RUN = ON;
+typedef enum
+{
+    ON,
+    OFF,
+} PowerState;
+
+PowerState power = ON;
 
 
 void dumpRegisters()
@@ -56,7 +60,7 @@ void doHLT(uint8_t tick)
 {
     if (tick == 7)
     {
-        RUN = OFF;
+        power = OFF;
     }
     else if (tick == 8)
     {
@@ -204,12 +208,12 @@ uint8_t getInstruction()
 
 void pressStart()
 {
-    RUN = ON;
+    power = ON;
 }
 
 void pressStop()
 {
-    RUN = OFF;
+    power = OFF;
 }
 
 
@@ -307,14 +311,14 @@ void doCycle()
 
 
 
-void runProgram(const uint16_t* program)
+void powerProgram(const uint16_t* program)
 {
     std::printf("Copying a program to RAM\n");
     memset(RAM, 0x00, RAM_LENGTH * sizeof(uint16_t));
     memmove(RAM, program, (RAM_LENGTH * sizeof(uint16_t)));
     for (;;)
     {
-        if(RUN == OFF)
+        if(power == OFF)
         {
             goto quit;
         }
@@ -328,6 +332,6 @@ void runProgram(const uint16_t* program)
 
 int main(int argc, char* argv[])
 {
-    runProgram(program0);
+    powerProgram(program0);
     return 0;
 }
