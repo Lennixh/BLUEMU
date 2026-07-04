@@ -133,17 +133,125 @@ void doADD(uint8_t tick)
 
 void doXOR(uint8_t tick)
 {
-
+    if (STATE == FETCH)
+    {
+        if (tick == 6)
+        {
+            Z = 0x00;
+        }
+        else if (tick == 7)
+        {
+            Z = ACC;
+        }
+        else if (tick == 8)
+        {
+            MAR = (IR & 0x0FFF);
+            STATE = EXECUTE;
+        }
+    }
+    else
+    {
+        if (tick == 3)
+        {
+            ACC = 0x00;
+            MBR = 0x00;
+        }
+        else if (tick == 4)
+        {
+            MBR = RAM[MAR];
+        }
+        else if (tick == 7)
+        {
+            ACC = MBR ^ Z;
+        }
+        else if (tick == 8)
+        {
+            STATE = FETCH;
+            MAR = PC;
+        }
+    }
 }
 
 void doAND(uint8_t tick)
 {
-    
+    if (STATE == FETCH)
+    {
+        if (tick == 6)
+        {
+            Z = 0x00;
+        }
+        else if (tick == 7)
+        {
+            Z = ACC;
+        }
+        else if (tick == 8)
+        {
+            MAR = (IR & 0x0FFF);
+            STATE = EXECUTE;
+        }
+    }
+    else
+    {
+        if (tick == 3)
+        {
+            ACC = 0x00;
+            MBR = 0x00;
+        }
+        else if (tick == 4)
+        {
+            MBR = RAM[MAR];
+        }
+        else if (tick == 7)
+        {
+            ACC = MBR & Z;
+        }
+        else if (tick == 8)
+        {
+            STATE = FETCH;
+            MAR = PC;
+        }
+    }
 }
 
 void doIOR(uint8_t tick)
 {
-    
+        if (STATE == FETCH)
+    {
+        if (tick == 6)
+        {
+            Z = 0x00;
+        }
+        else if (tick == 7)
+        {
+            Z = ACC;
+        }
+        else if (tick == 8)
+        {
+            MAR = (IR & 0x0FFF);
+            STATE = EXECUTE;
+        }
+    }
+    else
+    {
+        if (tick == 3)
+        {
+            ACC = 0x00;
+            MBR = 0x00;
+        }
+        else if (tick == 4)
+        {
+            MBR = RAM[MAR];
+        }
+        else if (tick == 7)
+        {
+            ACC = MBR | Z;
+        }
+        else if (tick == 8)
+        {
+            STATE = FETCH;
+            MAR = PC;
+        }
+    }
 }
 
 void doNOT(uint8_t tick)
