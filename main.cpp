@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[0x14] = {
+uint16_t program0[0x17] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
@@ -14,16 +14,19 @@ uint16_t program0[0x14] = {
     0x8009, // #7 (SRJ->#9)
     0x0000, // #8 (HLT)
     0x900B, // #9 (JMA->#B)
-    0xF696, // #A (NOP)
-    0xD000, // #B (RAL)
-    0x5000, // #C (NOT)
-    0xD001, // #D (RAL)
-    0xB010, // #E (INP)
-    0x5000, // #F (NOT)
-    0xC000, // #10 (OUT)
-    0x6008, // #11 (LDA->#8)
-    0x7013, // #12 (STA->#13)
-    0xF000  // #13 (NOP)
+    0x0010, // #A (DATA->16)
+    0xFFF0, // #B (DATA->-16)
+    0xD000, // #C (RAL)
+    0x5000, // #D (NOT)
+    0xD001, // #E (RAL)
+    0xB010, // #F (INP)
+    0x5000, // #10 (NOT)
+    0xC000, // #11 (OUT)
+    0x6008, // #12 (LDA->#8)
+    0x7016, // #13 (STA->#16)
+    0x100A, // #14 (ADD->#A)
+    0x100B, // #15 (ADD->#B)
+    0xF000  // #16 (NOP)
 };
 
 typedef enum 
@@ -80,7 +83,52 @@ void doHLT(uint8_t tick)
 
 void doADD(uint8_t tick)
 {
-
+    if (STATE == FETCH)
+    {
+        if (tick == 6)
+        {
+            Z = 0x00;
+        }
+        else if (tick == 7)
+        {
+            Z = ACC;
+        }
+        else if (tick == 8)
+        {
+            MAR = (IR & 0x0FFF);
+            STATE = EXECUTE;
+        }
+    }
+    else
+    {
+        if (tick == 3)
+        {
+            ACC = 0x00;
+            MBR = 0x00;
+        }
+        else if (tick == 4)
+        {
+            MBR = RAM[MAR];
+        }
+        else if (tick == 7)
+        {
+            uint32_t res = Z + MBR;
+            if ((Z & 0x8000) && (MBR & 0x8000) && !(res & 0x8000))
+            {
+                power = OFF; //Underflow
+            }
+            else if (!(Z & 0x8000) && !(MBR & 0x8000) && (res & 0x8000))
+            {
+                power = OFF; //Overflow
+            }
+            ACC = (uint16_t)res;
+        }
+        else if (tick == 8)
+        {
+            STATE = FETCH;
+            MAR = PC;
+        }
+    }
 }
 
 void doXOR(uint8_t tick)
