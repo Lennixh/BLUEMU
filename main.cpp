@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[0xC] = {
+uint16_t program0[0xD] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
@@ -15,7 +15,8 @@ uint16_t program0[0xC] = {
     0xF676, // #8 (NOP)
     0x900B, // #9 (JMA->#B)
     0xF696, // #A (NOP)
-    0x0000  // #B (HLT)
+    0xD000, // #B (RAL)
+    0x0000  // #C (HLT)
 };
 
 typedef enum 
@@ -182,7 +183,7 @@ void doRAL(uint8_t tick)
         }
         else if (tick == 8)
         {
-            STATE == EXECUTE;
+            STATE = EXECUTE;
         }
     }
     else
