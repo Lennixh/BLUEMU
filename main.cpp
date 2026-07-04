@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[0x12] = {
+uint16_t program0[0x14] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
@@ -12,7 +12,7 @@ uint16_t program0[0x12] = {
 	0xA003, // #5 (JMP->#3)
     0xE000, // #6 (CSA)
     0x8009, // #7 (SRJ->#9)
-    0xF676, // #8 (NOP)
+    0x0000, // #8 (HLT)
     0x900B, // #9 (JMA->#B)
     0xF696, // #A (NOP)
     0xD000, // #B (RAL)
@@ -21,7 +21,9 @@ uint16_t program0[0x12] = {
     0xB010, // #E (INP)
     0x5000, // #F (NOT)
     0xC000, // #10 (OUT)
-    0x0000  // #11 (HLT)
+    0x6008, // #11 (LDA->#8)
+    0x7013, // #12 (STA->#13)
+    0xF000  // #13 (NOP)
 };
 
 typedef enum 
@@ -133,12 +135,64 @@ void doNOT(uint8_t tick)
 
 void doLDA(uint8_t tick)
 {
-    
+    if (STATE == FETCH)
+    {
+        if (tick == 8)
+        {
+            STATE = EXECUTE;
+            MAR = (IR & 0x0FFF);
+        }
+    }
+    else
+    {
+        if (tick == 2)
+        {
+            ACC = 0x00;
+        }
+        else if (tick == 3)
+        {
+            MBR = 0x00;
+        }
+        else if (tick == 5)
+        {
+            MBR = RAM[MAR];
+            ACC = MBR;
+        }
+        else if (tick == 8)
+        {
+            STATE = FETCH;
+            MAR = PC;
+        }
+    }
 }
 
 void doSTA(uint8_t tick)
 {
-    
+    if (STATE == FETCH)
+    {
+        if (tick == 8)
+        {
+            STATE = EXECUTE;
+            MAR = (IR & 0x0FFF);
+        }
+    }
+    else
+    {
+        if (tick == 4)
+        {
+            MBR = 0;
+        }
+        else if (tick == 5)
+        {
+            MBR = ACC;
+            RAM[MAR] = MBR;
+        }
+        else if (tick == 8)
+        {
+            STATE = FETCH;
+            MAR = PC;
+        }
+    }
 }
 
 void doSRJ(uint8_t tick)
