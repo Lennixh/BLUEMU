@@ -170,7 +170,34 @@ void doOUT(uint8_t tick)
 
 void doRAL(uint8_t tick)
 {
-
+    if (tick == 1 && STATE == EXECUTE)
+    {
+        ACC = 0x00;
+    }
+    else if (tick == 2 && STATE == EXECUTE)
+    {
+        ACC = 2*Z;
+    }
+    else if (tick == 6 && STATE == FETCH)
+    {
+        Z = 0x00;
+    }
+    else if (tick == 7)
+    {
+        Z = ACC;
+    }
+    else if (tick == 8)
+    {
+        if (STATE == FETCH)
+        {
+            STATE = EXECUTE;
+        }
+        else
+        {
+            MAR = PC;
+            STATE = FETCH;
+        }
+    }
 }
 
 void doCSA(uint8_t tick)
