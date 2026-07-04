@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[0x10] = {
+uint16_t program0[0x12] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
@@ -19,7 +19,9 @@ uint16_t program0[0x10] = {
     0x5000, // #C (NOT)
     0xD001, // #D (RAL)
     0xB010, // #E (INP)
-    0x0000  // #F (HLT)
+    0x5000, // #F (NOT)
+    0xC000, // #10 (OUT)
+    0x0000  // #11 (HLT)
 };
 
 typedef enum 
@@ -45,7 +47,7 @@ typedef uint16_t bRegister;
 
 bRegister ACC;
 bRegister DIL = 0x0045;
-bRegister DO;
+bRegister DOL;
 bRegister DSL;
 bRegister IR;
 bRegister MAR;
@@ -59,7 +61,7 @@ const bool R = true;      // ALWAYS READY B)
 
 void dumpRegisters()
 {
-    std::printf("PC: %04x ACC: %04x IR: %04x Z: %04x MAR: %04x MBR: %04x DSL: %02x DIL: %02x DO: %02x\n", PC, ACC, IR, Z, MAR, MBR, (DSL & 0x00FF), (DIL & 0x00FF), (DO & 0x00FF));
+    std::printf("PC: %04x ACC: %04x IR: %04x Z: %04x MAR: %04x MBR: %04x DSL: %02x DIL: %02x DOL: %02x\n", PC, ACC, IR, Z, MAR, MBR, (DSL & 0x00FF), (DIL & 0x00FF), (DOL & 0x00FF));
 }
 
 void doHLT(uint8_t tick)
@@ -244,7 +246,40 @@ void doINP(uint8_t tick)
 
 void doOUT(uint8_t tick)
 {
-
+    if (STATE == FETCH)
+    {
+        if (tick == 6)
+        {
+            DOL = ((ACC >> 8) & 0x00FF);
+            DSL = (IR & 0x003f);
+        }
+        else if (tick == 7)
+        {
+            TRA = true;
+        }
+        else if (tick == 8)
+        {
+            STATE = EXECUTE;
+        }
+    }
+    else
+    {
+        if (tick == 6)
+        {
+            if (R == true)
+            {
+                TRA = false;
+            }
+        }
+        else if (tick == 8)
+        {
+            if (TRA == false)
+            {
+                STATE = FETCH;
+                MAR = PC;
+            }
+        }
+    }
 }
 
 void doRAL(uint8_t tick)
