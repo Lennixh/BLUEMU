@@ -20,11 +20,24 @@ bRegister DSL;
 bRegister IR;
 bRegister MAR;
 bRegister MBR;
-bRegister PC = 0x00;
+bRegister PC = 0b0000000000000000;
 bRegister SR;
 bRegister Z;
 
 uint8_t clock_pulse = 1;
+
+void doNOP(uint8_t tick)
+{
+    if (tick == 8)
+    {
+        MAR = PC;
+    }
+}
+
+uint8_t getInstruction()
+{
+    return ((IR & 0b1111000000000000) >> 12);
+}
 
 void processClockTick(uint8_t tick)
 {
@@ -69,6 +82,12 @@ void processClockTick(uint8_t tick)
         
         default:
             break;
+        
+        uint8_t INS = getInstruction();
+        if (INS == 15)
+        {
+            doNOP(tick);
+        }
     }
 }
 
