@@ -40,6 +40,8 @@ void dumpRegisters()
     std::printf("ACC: %04x DI: %02x DO: %02x DSL: %02x IR: %04x MAR: %04x MBR: %04x PC: %04x SR: %04x Z: %04x\n", ACC, (DI & 0x00FF), (DO & 0x00FF), (DSL & 0x00FF), IR, MAR, MBR, PC, SR, Z);
 }
 
+
+
 void doNOP(uint8_t tick)
 {
     if (tick == 8)
@@ -116,7 +118,7 @@ void doCycle()
     clock_pulse = 1;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     dumpRegisters();
     return 0;
