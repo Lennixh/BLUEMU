@@ -176,7 +176,7 @@ void doRAL(uint8_t tick)
     }
     else if (tick == 2 && STATE == EXECUTE)
     {
-        ACC = 2*Z;
+        ACC = ((Z & 0x8000) >> 15) | (Z * 2);
     }
     else if (tick == 6 && STATE == FETCH)
     {
