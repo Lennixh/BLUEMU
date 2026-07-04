@@ -193,10 +193,25 @@ void doNOP(uint8_t tick)
     }
 }
 
+
+
 uint8_t getInstruction()
 {
     return ((IR & 0b1111000000000000) >> 12);
 }
+
+
+
+void pressStart()
+{
+    RUN = ON;
+}
+
+void pressStop()
+{
+    RUN = OFF;
+}
+
 
 
 std::vector<void (*)(uint8_t tick)> instructionTable 
@@ -231,6 +246,10 @@ void processTick(uint8_t tick)
             if (STATE == FETCH)
             {
                 PC+=1;
+            }
+            else if (STATE == EXECUTE)
+            {
+
             }
             break;
 
