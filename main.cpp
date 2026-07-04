@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[0xD] = {
+uint16_t program0[0xF] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
@@ -16,7 +16,9 @@ uint16_t program0[0xD] = {
     0x900B, // #9 (JMA->#B)
     0xF696, // #A (NOP)
     0xD000, // #B (RAL)
-    0x0000  // #C (HLT)
+    0x5000, // #C (NOT)
+    0xD001, // #D (RAL)
+    0x0000  // #E (HLT)
 };
 
 typedef enum 
@@ -91,7 +93,37 @@ void doIOR(uint8_t tick)
 
 void doNOT(uint8_t tick)
 {
-    
+    if (STATE == FETCH)
+    {
+        if (tick == 6)
+        {
+            Z = 0x00;
+        }
+        else if (tick == 7)
+        {
+            Z = ACC;
+        }
+        else if (tick == 8)
+        {
+            STATE = EXECUTE;
+        }
+    }
+    else
+    {
+        if (tick == 1)
+        {
+            ACC = 0x00;
+        }
+        else if (tick == 2)
+        {
+            ACC = ~Z;
+        } 
+        else if (tick == 8)
+        {
+            MAR = PC;
+            STATE = FETCH;
+        }
+    }
 }
 
 void doLDA(uint8_t tick)
