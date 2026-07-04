@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[0xF] = {
+uint16_t program0[0x10] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
@@ -18,7 +18,8 @@ uint16_t program0[0xF] = {
     0xD000, // #B (RAL)
     0x5000, // #C (NOT)
     0xD001, // #D (RAL)
-    0x0000  // #E (HLT)
+    0xB010, // #E (INP)
+    0x0000  // #F (HLT)
 };
 
 typedef enum 
@@ -29,13 +30,21 @@ typedef enum
 
 State STATE = FETCH;
 
+typedef enum
+{
+    ON,
+    OFF,
+} PowerState;
+
+PowerState power = ON;
+
 #define RAM_LENGTH 4096
 uint16_t RAM[RAM_LENGTH];
 
 typedef uint16_t bRegister;
 
 bRegister ACC;
-bRegister DI;
+bRegister DIL = 0x0045;
 bRegister DO;
 bRegister DSL;
 bRegister IR;
@@ -45,18 +54,12 @@ bRegister PC = 0x00;
 bRegister SR = 0b1000000000000111;
 bRegister Z;
 
-typedef enum
-{
-    ON,
-    OFF,
-} PowerState;
-
-PowerState power = ON;
-
+bool TRA = false;
+const bool R = true;      // ALWAYS READY B)
 
 void dumpRegisters()
 {
-    std::printf("PC: %04x ACC: %04x IR: %04x Z: %04x MAR: %04x MBR: %04x DSL: %02x DI: %02x DO: %02x\n", PC, ACC, IR, Z, MAR, MBR, (DSL & 0x00FF), (DI & 0x00FF), (DO & 0x00FF));
+    std::printf("PC: %04x ACC: %04x IR: %04x Z: %04x MAR: %04x MBR: %04x DSL: %02x DIL: %02x DO: %02x\n", PC, ACC, IR, Z, MAR, MBR, (DSL & 0x00FF), (DIL & 0x00FF), (DO & 0x00FF));
 }
 
 void doHLT(uint8_t tick)
@@ -193,7 +196,50 @@ void doJMP(uint8_t tick)
 
 void doINP(uint8_t tick)
 {
-
+    if (STATE == FETCH)
+    {
+        
+        if (tick == 6)
+        {
+            
+            ACC = 0x00;
+            DSL = (IR & 0x003f);
+        }
+        else if (tick == 7)
+        {
+            TRA = true;
+        }
+        else if (tick == 8)
+        {
+            STATE = EXECUTE;
+        }
+    }
+    else
+    {
+        
+        if (tick == 5)
+        {
+            if (R == true)
+            {
+                ACC = DIL;
+            }
+        }
+        else if (tick == 6)
+        {
+            if (R == true)
+            {
+                TRA = false;
+            }
+        }
+        else if (tick == 8)
+        {
+            if (TRA == false)
+            {
+                STATE = FETCH;
+                MAR = PC;
+            }
+        }
+    }
 }
 
 void doOUT(uint8_t tick)
@@ -371,7 +417,6 @@ void doCycle()
     }
     clock_pulse = 1;
 }
-
 
 
 void powerProgram(const uint16_t* program)
