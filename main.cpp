@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <iostream>
 #include <cstring>
+#include <vector>
 
 uint16_t program0[6] = {
 	0xF000, // #0 (NOP)
@@ -36,19 +37,61 @@ bRegister SR;
 bRegister Z;
 
 
+
+
 void dumpRegisters()
 {
     std::printf("PC: %04x ACC: %04x IR: %04x Z: %04x MAR: %04x MBR: %04x DSL: %02x DI: %02x DO: %02x\n", PC, ACC, IR, Z, MAR, MBR, (DSL & 0x00FF), (DI & 0x00FF), (DO & 0x00FF));
 }
 
-
-
-void doNOP(uint8_t tick)
+void doHLT(uint8_t tick)
 {
-    if (tick == 8)
-    {
-        MAR = PC;
-    }
+
+}
+
+void doADD(uint8_t tick)
+{
+
+}
+
+void doXOR(uint8_t tick)
+{
+
+}
+
+void doAND(uint8_t tick)
+{
+    
+}
+
+void doIOR(uint8_t tick)
+{
+    
+}
+
+void doNOT(uint8_t tick)
+{
+    
+}
+
+void doLDA(uint8_t tick)
+{
+    
+}
+
+void doSTA(uint8_t tick)
+{
+    
+}
+
+void doSRJ(uint8_t tick)
+{
+    
+}
+
+void doJMA(uint8_t tick)
+{
+    
 }
 
 void doJMP(uint8_t tick)
@@ -67,12 +110,59 @@ void doJMP(uint8_t tick)
     }   
 }
 
+void doINP(uint8_t tick)
+{
+
+}
+
+void doOUT(uint8_t tick)
+{
+
+}
+
+void doRAL(uint8_t tick)
+{
+
+}
+
+void doCSA(uint8_t tick)
+{
+    
+}
+
+void doNOP(uint8_t tick)
+{
+    if (tick == 8)
+    {
+        MAR = PC;
+    }
+}
 
 uint8_t getInstruction()
 {
     return ((IR & 0b1111000000000000) >> 12);
 }
 
+
+std::vector<void (*)(uint8_t tick)> instructionTable 
+{
+    doHLT,
+    doADD,
+    doXOR,
+    doAND,
+    doIOR,
+    doNOT,
+    doLDA,
+    doSTA,
+    doSRJ,
+    doJMA,
+    doJMP,
+    doINP,
+    doOUT,
+    doRAL,
+    doCSA,
+    doNOP
+};
 
 
 void processTick(uint8_t tick)
@@ -125,14 +215,7 @@ void processTick(uint8_t tick)
         
     }
     uint8_t INS = getInstruction();
-    if (INS == 15)
-    {
-        doNOP(tick);
-    }
-    else if (INS == 10)
-    {
-        doJMP(tick);
-    }
+    (*instructionTable[INS])(tick);
 }
 
 
