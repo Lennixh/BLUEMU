@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 
-uint16_t program0[0x17] = {
+uint16_t program0[0x1a] = {
 	0xF000, // #0 (NOP)
 	0xF003, // #1 (NOP)
 	0xA004, // #2 (JMP->#4)
@@ -23,10 +23,13 @@ uint16_t program0[0x17] = {
     0x5000, // #10 (NOT)
     0xC000, // #11 (OUT)
     0x6008, // #12 (LDA->#8)
-    0x7016, // #13 (STA->#16)
+    0x7019, // #13 (STA->#19)
     0x100A, // #14 (ADD->#A)
     0x100B, // #15 (ADD->#B)
-    0xF000  // #16 (NOP)
+    0x200B, // #16 (XOR->#B)
+    0x300A, // #17 (AND->#A)
+    0x400F, // #18 (IOR->#F)
+    0xF000  // #19 (NOP)
 };
 
 typedef enum 
