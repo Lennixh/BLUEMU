@@ -170,29 +170,32 @@ void doOUT(uint8_t tick)
 
 void doRAL(uint8_t tick)
 {
-    if (tick == 1 && STATE == EXECUTE)
+    if (STATE == FETCH)
     {
-        ACC = 0x00;
-    }
-    else if (tick == 2 && STATE == EXECUTE)
-    {
-        ACC = ((Z & 0x8000) >> 15) | (Z * 2);
-    }
-    else if (tick == 6 && STATE == FETCH)
-    {
-        Z = 0x00;
-    }
-    else if (tick == 7)
-    {
-        Z = ACC;
-    }
-    else if (tick == 8)
-    {
-        if (STATE == FETCH)
+        if (tick == 6)
         {
-            STATE = EXECUTE;
+            Z = 0x00;
         }
-        else
+        else if (tick == 7)
+        {
+            Z = ACC;
+        }
+        else if (tick == 8)
+        {
+            STATE == EXECUTE;
+        }
+    }
+    else
+    {
+        if (tick == 1)
+        {
+            ACC = 0x00;
+        }
+        else if (tick == 2)
+        {
+            ACC = ((Z & 0x8000) >> 15) | (Z * 2);
+        }
+        else if (tick == 8)
         {
             MAR = PC;
             STATE = FETCH;
