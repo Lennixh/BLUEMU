@@ -2,12 +2,13 @@
 #include <iostream>
 #include <cstring>
 
-uint16_t program0[4] = 
-{
-	0xF000, // NOP 000
-	0xF003, // NOP 003
-	0xF000, // NOP 000
-	0xF005  // NOP 005
+uint16_t program0[6] = {
+	0xF000, // #0 (NOP)
+	0xF003, // #1 (NOP)
+	0xA004, // #2 (JMP->#4)
+	0xF005, // #3 (NOP)
+	0xF010, // #4 (NOP)
+	0xA000  // #5 (JMP->#0)
 };
 
 typedef enum 
@@ -50,6 +51,21 @@ void doNOP(uint8_t tick)
     }
 }
 
+void doJMP(uint8_t tick)
+{
+    if (tick == 6)
+    {
+        PC = 0x00;
+    } 
+    else if (tick == 7) 
+    {
+        PC = (IR & 0x0FFF);
+    }
+    else if (tick == 8)
+    {
+        MAR = PC;
+    }   
+}
 
 
 uint8_t getInstruction()
@@ -112,6 +128,10 @@ void processTick(uint8_t tick)
     if (INS == 15)
     {
         doNOP(tick);
+    }
+    else if (INS == 10)
+    {
+        doJMP(tick);
     }
 }
 
