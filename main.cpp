@@ -1,4 +1,13 @@
 #include <cstdint>
+#include <iostream>
+
+uint16_t program0[4] =
+{
+    0b1111000000000000, //NOP, 0
+    0b1111000000000011, //NOP, 3
+    0b1111101010101010, //NOP, 2730
+    0x0F05              //NOP, 5
+};
 
 typedef enum 
 {
@@ -25,6 +34,11 @@ bRegister SR;
 bRegister Z;
 
 uint8_t clock_pulse = 1;
+
+void dumpRegisters()
+{
+    std::printf("ACC: %04x DI: %02x DO: %02x DSL: %02x IR: %04x MAR: %04x MBR: %04x PC: %04x SR: %04x Z: %04x\n", ACC, (DI & 0x00FF), (DO & 0x00FF), (DSL & 0x00FF), IR, MAR, MBR, PC, SR, Z);
+}
 
 void doNOP(uint8_t tick)
 {
@@ -104,5 +118,6 @@ void doCycle()
 
 int main()
 {
+    dumpRegisters();
     return 0;
 }
